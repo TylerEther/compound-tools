@@ -23,7 +23,7 @@ This script will compute a list of accounts (Ethereum addresses) affected by the
 
 The first outputted list is a list of tuples - transaction ID, account address, and amount over-accrued in the transaction.
 
-The second outputted list is a list of tuples - account address and total over-accrued for that address.
+The second outputted list is a list of tuples - account address, total over-accrued for that address, and their current COMP accrued.
 
 The total amount of over-accrued COMP across all affected accounts is also outputted following the second list.
 

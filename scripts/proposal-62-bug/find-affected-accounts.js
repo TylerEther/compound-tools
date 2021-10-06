@@ -63,6 +63,8 @@ async function processLog(log) {
 }
 
 async function main() {
+    const comptroller = await hre.ethers.getContractAt("Comptroller", Comptroller);
+
     console.log("Processing logs...");
 
     for (const cToken of affectedCTokens) {
@@ -85,14 +87,19 @@ async function main() {
     const sorted = new Map([...overAccruedAmounts.entries()].sort((a, b) => b[1] - a[1]));
 
     var totalOverAccrued = BigNumber.from(0);
+    var totalCurrentAccrued = BigNumber.from(0);
 
     for (const [account, amount] of sorted) {
-        console.log(account + "," + ethers.utils.formatEther(amount, {commify: true}));
+        const currentAccrued = await comptroller.compAccrued(account);
+
+        console.log(account + "," + ethers.utils.formatEther(amount, {commify: true}) + "," + ethers.utils.formatEther(currentAccrued, {commify: true}));
 
         totalOverAccrued = totalOverAccrued.add(amount);
+        totalCurrentAccrued = totalCurrentAccrued.add(currentAccrued);
     }
 
     console.log("Total over accrued =", ethers.utils.formatEther(totalOverAccrued, {commify: true}));
+    console.log("Total current accrued =", ethers.utils.formatEther(totalCurrentAccrued, {commify: true}));
 }
 
 main()
