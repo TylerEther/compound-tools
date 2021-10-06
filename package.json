@@ -1,0 +1,15 @@
+{
+  "name": "compound-tools",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/TylerEther/compound-tools",
+  "license": "MIT",
+  "scripts": {
+    "compile": "hardhat compile"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "ethers": "^5.4.7",
+    "hardhat": "^2.6.5"
+  }
+}
