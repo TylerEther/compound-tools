@@ -18,6 +18,7 @@ const abiCoder = new ethers.utils.AbiCoder();
 const compInitialIndex = BigNumber.from("1000000000000000000000000000000000000");
 
 const outputProposalSim = false;
+const verifyProposal65 = true;
 
 var accounts = new Set();
 var overAccruedAmounts = new Map();
@@ -62,6 +63,45 @@ async function processLog(log) {
 
         console.log(log.transactionHash + "," + account + "," + ethers.utils.formatEther(compDelta, {commify: true}));
     }
+}
+
+function addressArraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) {
+            console.log(a[i] + " !== " + b[i]);
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function amountArraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+
+    for (var i = 0; i < a.length; ++i) {
+        if (!a[i].eq(b[i])) {
+            console.log(a[i] + " !== " + b[i]);
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function formatAddresses(addresses) {
+    for (var i = 0; i < addresses.length; ++i)
+        addresses[i] = ethers.utils.getAddress(addresses[i]);
+
+    return addresses;
 }
 
 async function main() {
@@ -123,6 +163,30 @@ async function main() {
         console.log("Proposal simulation accounts =", proposalAccounts);
         console.log("Proposal simulation amounts =", proposalAmounts);
         console.log("Proposal sim = From CompHolder (GovernorBravo GovernorBravo Propose \"Upgrade Comptroller\" [(Address Unitroller) (Address NewComptroller) (Address Unitroller)] [0 0 0] [\"_setPendingImplementation(address)\" \"_become(address)\" \"fixBadAccruals(address[],uint256[])\"] [[(Address NewComptroller)] [(Address Unitroller)] [" + proposalAccounts + " " + proposalAmounts + "]])")
+    }
+
+    if (verifyProposal65) {
+        const gov = await hre.ethers.getContractAt("GovernorBravoDelegate", "0xc0da02939e1441f497fd74f78ce7decb17b66529");
+
+        const actions = await gov.getActions(65);
+
+        const decodedData = abiCoder.decode(["address[]", "uint[]"], actions['calldatas'][2]);
+
+        const proposalAccounts = formatAddresses(decodedData[0]);
+        const proposalAmounts = decodedData[1];
+
+        const sortedAccounts = formatAddresses([ ...sorted.keys() ]);
+        const sortedAmounts = [ ...sorted.values() ];
+
+        console.log("Proposal accounts =", proposalAccounts);
+        console.log("Our accounts =", sortedAccounts);
+        console.log("Proposal amounts =", proposalAmounts);
+        console.log("Our amounts =", sortedAmounts);
+
+        if (addressArraysEqual(proposalAccounts, sortedAccounts) && amountArraysEqual(proposalAmounts, sortedAmounts))
+            console.log("Proposal data matches our data.");
+        else
+            console.log("WARNING: Proposal data does not match our data.");
     }
 }
 
