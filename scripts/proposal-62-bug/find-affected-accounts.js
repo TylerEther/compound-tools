@@ -17,6 +17,8 @@ const abiCoder = new ethers.utils.AbiCoder();
 
 const compInitialIndex = BigNumber.from("1000000000000000000000000000000000000");
 
+const outputProposalSim = false;
+
 var accounts = new Set();
 var overAccruedAmounts = new Map();
 
@@ -100,6 +102,28 @@ async function main() {
 
     console.log("Total over accrued =", ethers.utils.formatEther(totalOverAccrued, {commify: true}));
     console.log("Total current accrued =", ethers.utils.formatEther(totalCurrentAccrued, {commify: true}));
+
+    if (outputProposalSim) {
+        var proposalAccounts = "";
+        var proposalAmounts = "";
+
+        for (const [account, amount] of sorted) {
+            if (proposalAccounts.length > 0) {
+                proposalAccounts += " ";
+                proposalAmounts += " ";
+            }
+
+            proposalAccounts += account;
+            proposalAmounts += amount;
+        }
+
+        proposalAccounts = "[" + proposalAccounts + "]";
+        proposalAmounts = "[" + proposalAmounts + "]";
+
+        console.log("Proposal simulation accounts =", proposalAccounts);
+        console.log("Proposal simulation amounts =", proposalAmounts);
+        console.log("Proposal sim = From CompHolder (GovernorBravo GovernorBravo Propose \"Upgrade Comptroller\" [(Address Unitroller) (Address NewComptroller) (Address Unitroller)] [0 0 0] [\"_setPendingImplementation(address)\" \"_become(address)\" \"fixBadAccruals(address[],uint256[])\"] [[(Address NewComptroller)] [(Address Unitroller)] [" + proposalAccounts + " " + proposalAmounts + "]])")
+    }
 }
 
 main()
